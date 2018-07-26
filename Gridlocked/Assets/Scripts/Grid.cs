@@ -4,36 +4,29 @@ using UnityEngine;
 
 public class Grid : MonoBehaviour
 {
+    public static Grid instance;
+
     private Cell[,] grid;
 
-    public Transform originPoint;
-    public Transform test;
-    private Cell testCell;
+    [SerializeField] private Transform originPoint;
 
-    public float cellSize;
-    public Vector2Int gridDimensions;
+    [SerializeField] private float cellSize;
+    [SerializeField] private Vector2Int gridDimensions;
 
-    public GameObject tilePrefab;
-    public Material highlightMaterial;
-    public Material defaultMaterial;
+    [SerializeField] private GameObject tilePrefab;
+    [SerializeField] private Material highlightMaterial;
+    [SerializeField] private Material defaultMaterial;
+
+    [SerializeField] private Transform tilesParent;
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     private void Start()
     {
-        Initialize();
-    }
-
-    private void Update()
-    {
-        testCell = WorldToGrid(test.position);
-
-        foreach (Cell cell in grid)
-        {
-            if (testCell == cell)
-                cell.tile.GetComponent<MeshRenderer>().material = highlightMaterial;
-            else
-                cell.tile.GetComponent<MeshRenderer>().material = defaultMaterial;
-
-        }
+        Initialize();      
     }
 
     private void Initialize()
@@ -45,12 +38,14 @@ public class Grid : MonoBehaviour
             for (int y = 0; y < gridDimensions.y; y++)
             {
                 grid[x, y] = new Cell(new Vector3(originPoint.position.x + cellSize * x, 0, originPoint.position.z + cellSize * y));
-                grid[x, y].tile = Instantiate(tilePrefab, grid[x, y].worldPosition, Quaternion.identity);
+                grid[x, y].tile = Instantiate(tilePrefab, grid[x, y].worldPosition, Quaternion.identity, tilesParent);
             }
         }
+
+        DisableIndicator();
     }
 
-    private Cell WorldToGrid(Vector3 worldPos)
+    public Cell WorldToGrid(Vector3 worldPos)
     {
         int x = Mathf.Clamp(Mathf.RoundToInt(worldPos.x / cellSize - originPoint.position.x), 0, gridDimensions.x - 1);
         int y = Mathf.Clamp(Mathf.RoundToInt(worldPos.z / cellSize - originPoint.position.z), 0, gridDimensions.y - 1);
@@ -58,20 +53,13 @@ public class Grid : MonoBehaviour
         return grid[x, y];
     }
 
-    private void OnDrawGizmos()
+    public void ActivateIndicator()
     {
-        if (grid != null)
-        {
-            foreach (Cell cell in grid)
-            {
-                Gizmos.color = new Color(145, 99, 50, 0.25f);
+        tilesParent.gameObject.SetActive(true);
+    }
 
-                if (cell == testCell)
-                    Gizmos.color = new Color(145, 99, 50, 0.5f);
-                    
-
-                Gizmos.DrawCube(cell.worldPosition, new Vector3(cellSize - 0.05f, 0.1f, cellSize - 0.05f));
-            }
-        }
+    public void DisableIndicator()
+    {
+        tilesParent.gameObject.SetActive(false);
     }
 }

@@ -9,11 +9,8 @@ public class Utility : MonoBehaviour
     private static Vector3 m_MousePos;
     private static Vector3 tempPos;
 
-	public Transform cursor;
-
 	public Transform ground;
 	private float distance;
-
 
     private void Update()
     {
@@ -21,7 +18,5 @@ public class Utility : MonoBehaviour
 		tempPos = Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, distance));
 
         m_MousePos = new Vector3(tempPos.x, 0, tempPos.z);
-
-        cursor.position = m_MousePos;
     }
 }
