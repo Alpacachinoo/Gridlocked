@@ -13,13 +13,13 @@ public class GameManager : MonoBehaviour
 
     public void Pause()
     {
-        Enemy.ToggleAI(false);
+        StandardEnemy.ToggleAI(false);
         Player.instance.TogglePlayerInteraction(false);
     }
 
     public void Play()
     {
-        Enemy.ToggleAI(true);
+        StandardEnemy.ToggleAI(true);
         Player.instance.TogglePlayerInteraction(true);
     }
 }

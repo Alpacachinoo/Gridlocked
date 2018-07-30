@@ -10,6 +10,8 @@ public class Projectile : MonoBehaviour
     private Rigidbody rb;
     #endregion
 
+    public int hits;
+
     public void Shoot(Vector3 direction, float force, string target)
     {
         rb = GetComponent<Rigidbody>();
@@ -29,6 +31,11 @@ public class Projectile : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.tag == target)
-            Debug.Log("Hit: " + target);
+        {
+            if (target == "Enemy")
+            {
+                other.GetComponent<Enemy>().health.Damage(5);
+            }
+        }     
     }
 }
