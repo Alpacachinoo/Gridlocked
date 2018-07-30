@@ -6,13 +6,22 @@ using UnityEngine.AI;
 public class Player : MonoBehaviour
 {
     public static Player instance;
-    public delegate void PlayerEventHandler(int currentAmmo);
-    public static PlayerEventHandler AmmoChanged;
 
-    private void FireEvent(PlayerEventHandler _event)
+    public delegate void PlayerNavigationEventHandler();
+    public static PlayerNavigationEventHandler DestinationReached;
+
+    public delegate void PlayerShootingEventHandler(int currentAmmo);
+    public static PlayerShootingEventHandler AmmoChanged;
+
+    private void FireEvent(PlayerShootingEventHandler _event)
     {
         if (_event != null)
             _event(p_Ammo);
+    }
+    private void FireEvent(PlayerNavigationEventHandler _event)
+    {
+        if (_event != null)
+            _event();
     }
 
     // p: Player, m: Mouse, v:Velocity.
@@ -20,7 +29,9 @@ public class Player : MonoBehaviour
     #region p_Movement.
     [Header("Movement")]
     [SerializeField] private float p_Speed;
-    private bool isAuto = false;
+    private bool P_PlayerInteractionEnabled = true;
+
+    private Cell currentCell;
 
     //Velocity direction & angle.
 	private Vector3 v_Direction;
@@ -34,8 +45,8 @@ public class Player : MonoBehaviour
 
     #region p_Shooting.
     [Header("Shooting")]
-    [SerializeField] private Rigidbody p_ProjectilePrefab;
-    private Rigidbody p_Projectile; //Projectile instance.
+    [SerializeField] private Projectile p_ProjectilePrefab;
+    private Projectile p_Projectile; //Projectile instance.
     [SerializeField] private float p_ShootForce;
 
     public int p_MaxAmmo;
@@ -85,16 +96,13 @@ public class Player : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
             Shoot();
 
-        if (Input.GetKeyDown(KeyCode.R))
-            Reload();
-
         if (nav.hasPath)
         {
             v_Direction = nav.velocity.normalized;
 
             if ((int)(nav.remainingDistance) == 0)
             {
-                nav.ResetPath();
+                ArrivedAtDestination();
             }
         }
     }
@@ -106,6 +114,7 @@ public class Player : MonoBehaviour
 
     private void Initialize()
     {
+        nav.enabled = false;
         Reload();
     }
 
@@ -116,12 +125,20 @@ public class Player : MonoBehaviour
 
 	private void Move() 
 	{
-        if (isAuto == false)
+        if (P_PlayerInteractionEnabled == true)
         {
             rb.velocity = inputDirection * p_Speed;
             v_Direction = rb.velocity.normalized;
+
+            currentCell = Grid.instance.WorldToGrid(transform.position);
+            Cell.OccupyCell(currentCell);
         }
 	}
+
+    private void ResetVelocity()
+    {
+        rb.velocity = Vector3.zero;
+    }
 
     private void TurnBody()
     {
@@ -149,11 +166,10 @@ public class Player : MonoBehaviour
 
     private void Shoot()
     {
-        if (p_Ammo > 0)
+        if (p_Ammo > 0 && P_PlayerInteractionEnabled == true)
         {
             p_Projectile = Instantiate(p_ProjectilePrefab, p_ProjectileOrigin.position, Quaternion.identity);
-
-            p_Projectile.AddForce(m_Direction * p_ShootForce, ForceMode.Impulse);
+            p_Projectile.Shoot(m_Direction, p_ShootForce, "Enemy");
 
             p_Ammo--;
 
@@ -169,6 +185,28 @@ public class Player : MonoBehaviour
 
     public void SetNavDestination(Vector3 destination)
     {
+        nav.enabled = true;
         nav.SetDestination(destination);
+    }
+
+    private void ArrivedAtDestination()
+    {
+        nav.ResetPath();
+
+        Reload();
+
+        nav.enabled = false;
+
+        FireEvent(DestinationReached);
+    }
+
+    public void TogglePlayerInteraction(bool toggle)
+    {
+        P_PlayerInteractionEnabled = toggle;
+
+        if (toggle == false)
+        {
+            ResetVelocity();
+        }
     }
 }

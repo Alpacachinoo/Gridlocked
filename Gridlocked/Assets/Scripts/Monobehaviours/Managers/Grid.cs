@@ -14,10 +14,13 @@ public class Grid : MonoBehaviour
     [SerializeField] private Vector2Int gridDimensions;
 
     [SerializeField] private GameObject tilePrefab;
-    [SerializeField] private Material highlightMaterial;
-    [SerializeField] private Material defaultMaterial;
+
+    [SerializeField] private Material occupiedTileMaterial;
+    [SerializeField] private Material defaultTileMaterial;
 
     [SerializeField] private Transform tilesParent;
+
+    [SerializeField] private LayerMask obstacleLayer;
 
     private void Awake()
     {
@@ -26,23 +29,31 @@ public class Grid : MonoBehaviour
 
     private void Start()
     {
-        Initialize();      
+        Initialize();
     }
 
     private void Initialize()
     {
+        Vector3 cellPosition;
+
         grid = new Cell[gridDimensions.x, gridDimensions.y];
 
         for (int x = 0; x < gridDimensions.x; x++)
         {
             for (int y = 0; y < gridDimensions.y; y++)
             {
-                grid[x, y] = new Cell(new Vector3(originPoint.position.x + cellSize * x, 0, originPoint.position.z + cellSize * y));
+                cellPosition = new Vector3(originPoint.position.x + cellSize * x, 0, originPoint.position.z + cellSize * y);
+
+                grid[x, y] = new Cell(cellPosition, x, y, Physics.OverlapSphere(cellPosition, cellSize, obstacleLayer).Length == 0);
+
                 grid[x, y].tile = Instantiate(tilePrefab, grid[x, y].worldPosition, Quaternion.identity, tilesParent);
+
+                if (grid[x, y].c_Walkable == false)
+                    grid[x, y].tile.GetComponent<MeshRenderer>().material = occupiedTileMaterial;
             }
         }
 
-        DisableIndicator();
+        tilesParent.gameObject.SetActive(false);
     }
 
     public Cell WorldToGrid(Vector3 worldPos)
@@ -55,11 +66,15 @@ public class Grid : MonoBehaviour
 
     public void ActivateIndicator()
     {
+        if (Cell.c_OccupiedCell != null)
+            Cell.c_OccupiedCell.tile.GetComponent<MeshRenderer>().material = occupiedTileMaterial;
         tilesParent.gameObject.SetActive(true);
     }
 
     public void DisableIndicator()
     {
+        if (Cell.c_OccupiedCell != null)
+            Cell.c_OccupiedCell.tile.GetComponent<MeshRenderer>().material = defaultTileMaterial;
         tilesParent.gameObject.SetActive(false);
     }
 }
