@@ -14,6 +14,8 @@ public class Health
     public event HealthEventHandler Damaged;
     public event HealthEventHandler Dead;
 
+    public event HealthEventHandler HealthStatusChanged;
+
     private void FireEvent(HealthEventHandler _event)
     {
         if (_event != null)
@@ -22,7 +24,7 @@ public class Health
 
     public void Initialize()
     {
-        healthPoints = maxHealth;
+        Heal(maxHealth);
     }
 
     public void Heal(float health)
@@ -32,6 +34,7 @@ public class Health
         if (healthPoints > maxHealth)
             healthPoints = maxHealth;
 
+        FireEvent(HealthStatusChanged);
         FireEvent(Healed);
     }
 
@@ -45,6 +48,7 @@ public class Health
         }
         else
         {
+            FireEvent(HealthStatusChanged);
             FireEvent(Damaged);
         }
     }
@@ -52,6 +56,7 @@ public class Health
     private void Die()
     {
         healthPoints = 0;
+        FireEvent(HealthStatusChanged);
         FireEvent(Dead);
     }
 }

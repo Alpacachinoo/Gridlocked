@@ -25,7 +25,7 @@ GameObject:
   - component: {fileID: 54785219943717240}
   - component: {fileID: 114344990369076040}
   - component: {fileID: 114521518763242542}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Shell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -58,7 +58,6 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
-  m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 2100000, guid: 2ef4de70aa923ab44929f8c37dc2102c, type: 2}
   m_StaticBatchInfo:
@@ -113,6 +112,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa1fc5496c66ed248baf36d0bbed68ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  damage: 10
   hits: 0
 --- !u!114 &114521518763242542
 MonoBehaviour:

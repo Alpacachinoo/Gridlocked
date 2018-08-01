@@ -55,17 +55,24 @@ public class StandardEnemy : Enemy
         }
     }
 
+    [SerializeField] private LayerMask obstacleLayer;
+
     protected override void Attack()
     {
-        //if (Time.time >= attackCooldownTime)
-        //{
-        //    directionToTarget = (target.position - transform.position).normalized;
+        if (Time.time >= attackCooldownTime)
+        {
+            directionToTarget = (target.position - transform.position).normalized;
 
-        //    projectileInstance = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
-        //    projectileInstance.Shoot(directionToTarget, shootForce, "Player");
+            if (!Physics.Raycast(transform.position, directionToTarget, attackRadius, LayerMap.currentLayerMap.GetLayer("Obstacle")))
+            {
+                projectileInstance = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
+                projectileInstance.Shoot(directionToTarget, shootForce, "Player");
 
-        //    attackCooldownTime = Time.time + attackCooldown;
-        //}
+                Debug.DrawRay(transform.position, directionToTarget * attackRadius, Color.red);
+            }
+
+            attackCooldownTime = Time.time + attackCooldown;
+        }
     }
 
     protected override void Healed()
@@ -81,5 +88,6 @@ public class StandardEnemy : Enemy
     protected override void Die()
     {
         Debug.Log("Dead");
+        Destroy(this.gameObject);
     }
 }

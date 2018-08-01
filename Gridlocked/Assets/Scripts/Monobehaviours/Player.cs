@@ -24,6 +24,20 @@ public class Player : MonoBehaviour
             _event();
     }
 
+    private void OnEnable()
+    {
+        this.health.Healed += Healed;
+        this.health.Damaged += Damaged;
+        this.health.Dead += Die;
+    }
+
+    private void OnDisable()
+    {
+        this.health.Healed -= Healed;
+        this.health.Damaged -= Damaged;
+        this.health.Dead -= Die;
+    }
+
     // p: Player, m: Mouse, v:Velocity.
 
     #region p_Movement.
@@ -53,6 +67,11 @@ public class Player : MonoBehaviour
     private int p_Ammo;
 
     [SerializeField] private Transform p_ProjectileOrigin;
+    #endregion
+
+    #region Health.
+    [Header("Health")]
+    public Health health;
     #endregion
 
     #region Inputs.
@@ -115,6 +134,7 @@ public class Player : MonoBehaviour
     private void Initialize()
     {
         nav.enabled = false;
+        health.Initialize();
         Reload();
     }
 
@@ -208,5 +228,21 @@ public class Player : MonoBehaviour
         {
             ResetVelocity();
         }
+    }
+
+    private void Healed()
+    {
+
+    }
+
+    private void Damaged()
+    {
+        Debug.Log("I've been hit!");
+    }
+
+    private void Die()
+    {
+        gameObject.SetActive(false);
+        GameManager.instance.Pause();
     }
 }

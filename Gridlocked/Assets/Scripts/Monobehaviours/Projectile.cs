@@ -5,6 +5,7 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     private string target; //Target's tag.
+    [SerializeField] private float damage;
 
     #region References.
     private Rigidbody rb;
@@ -28,14 +29,28 @@ public class Projectile : MonoBehaviour
         rb.AddForce(direction * force, ForceMode.Impulse);
     }
 
+    private void Hit(Health other)
+    {
+        other.Damage(damage);
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.tag == target)
         {
             if (target == "Enemy")
             {
-                other.GetComponent<Enemy>().health.Damage(5);
+                Hit(other.GetComponent<Enemy>().health);
             }
-        }     
+            else if (target == "Player")
+            {
+                Hit(other.GetComponent<Player>().health);
+            }
+
+            Destroy(this.gameObject);
+        }
+
+        if (other.tag == "Obstacle")
+            Destroy(this.gameObject);
     }
 }
