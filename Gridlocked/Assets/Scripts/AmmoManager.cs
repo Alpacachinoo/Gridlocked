@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// DO THIS AT CLASS. 8/2/18.
+
 public class AmmoManager : MonoBehaviour
 {
     public static readonly int maxAmmo;

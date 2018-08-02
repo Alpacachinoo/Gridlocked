@@ -133,6 +133,8 @@ public class Player : MonoBehaviour
 
     private void Initialize()
     {
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+
         nav.enabled = false;
         health.Initialize();
         Reload();
