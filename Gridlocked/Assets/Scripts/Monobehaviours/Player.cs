@@ -7,17 +7,11 @@ public class Player : MonoBehaviour
 {
     public static Player instance;
 
+    #region Events & Delegates.
+
     public delegate void PlayerNavigationEventHandler();
     public static PlayerNavigationEventHandler DestinationReached;
 
-    public delegate void PlayerShootingEventHandler(int currentAmmo);
-    public static PlayerShootingEventHandler AmmoChanged;
-
-    private void FireEvent(PlayerShootingEventHandler _event)
-    {
-        if (_event != null)
-            _event(p_Ammo);
-    }
     private void FireEvent(PlayerNavigationEventHandler _event)
     {
         if (_event != null)
@@ -37,6 +31,8 @@ public class Player : MonoBehaviour
         this.health.Damaged -= Damaged;
         this.health.Dead -= Die;
     }
+
+    #endregion
 
     // p: Player, m: Mouse, v:Velocity.
 
@@ -63,9 +59,6 @@ public class Player : MonoBehaviour
     private Projectile p_Projectile; //Projectile instance.
     [SerializeField] private float p_ShootForce;
 
-    public int p_MaxAmmo;
-    private int p_Ammo;
-
     [SerializeField] private Transform p_ProjectileOrigin;
     #endregion
 
@@ -91,6 +84,8 @@ public class Player : MonoBehaviour
 	private Animator anim;
     private NavMeshAgent nav;
     #endregion
+
+    #region Unity callback functions.
 
     private void Awake()
     {
@@ -131,6 +126,8 @@ public class Player : MonoBehaviour
 		Move();
     }
 
+    #endregion
+
     private void Initialize()
     {
         rb.interpolation = RigidbodyInterpolation.Interpolate;
@@ -140,12 +137,18 @@ public class Player : MonoBehaviour
         Reload();
     }
 
+    #region Input
+
     private void UpdateInput()
     {
         inputDirection = new Vector3(Input.GetAxisRaw("Horizontal"), rb.velocity.y, Input.GetAxisRaw("Vertical")).normalized;
     }
 
-	private void Move() 
+    #endregion
+
+    #region Movement.
+
+    private void Move() 
 	{
         if (P_PlayerInteractionEnabled == true)
         {
@@ -161,6 +164,10 @@ public class Player : MonoBehaviour
     {
         rb.velocity = Vector3.zero;
     }
+
+    #endregion
+
+    #region Tank & Turret Orientation.
 
     private void TurnBody()
     {
@@ -186,24 +193,29 @@ public class Player : MonoBehaviour
         m_TankTurret.rotation = Quaternion.Euler(transform.rotation.x, m_Angle, transform.rotation.z);
     }
 
+    #endregion
+
+    #region Shooting.
+
     private void Shoot()
     {
-        if (p_Ammo > 0 && P_PlayerInteractionEnabled == true)
+        if (AmmoHandler.ammo > 0 && P_PlayerInteractionEnabled == true)
         {
             p_Projectile = Instantiate(p_ProjectilePrefab, p_ProjectileOrigin.position, Quaternion.identity);
             p_Projectile.Shoot(m_Direction, p_ShootForce, "Enemy");
 
-            p_Ammo--;
-
-            FireEvent(AmmoChanged);
+            AmmoHandler.DecrementAmmo(1);
         }
     }
 
     public void Reload()
     {
-        p_Ammo = p_MaxAmmo;
-        FireEvent(AmmoChanged);
+        AmmoHandler.IncrementAmmo(AmmoHandler.maxAmmo);
     }
+
+    #endregion
+
+    #region Navigation logic.
 
     public void SetNavDestination(Vector3 destination)
     {
@@ -221,16 +233,9 @@ public class Player : MonoBehaviour
 
         FireEvent(DestinationReached);
     }
+    #endregion
 
-    public void TogglePlayerInteraction(bool toggle)
-    {
-        P_PlayerInteractionEnabled = toggle;
-
-        if (toggle == false)
-        {
-            ResetVelocity();
-        }
-    }
+    #region Health event listeners.
 
     private void Healed()
     {
@@ -246,5 +251,17 @@ public class Player : MonoBehaviour
     {
         gameObject.SetActive(false);
         GameManager.instance.Pause();
+    }
+
+    #endregion
+
+    public void TogglePlayerInteraction(bool toggle)
+    {
+        P_PlayerInteractionEnabled = toggle;
+
+        if (toggle == false)
+        {
+            ResetVelocity();
+        }
     }
 }

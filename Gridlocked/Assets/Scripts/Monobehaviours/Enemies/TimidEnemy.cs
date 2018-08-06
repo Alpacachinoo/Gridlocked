@@ -4,12 +4,31 @@ using UnityEngine;
 
 public class TimidEnemy : Enemy
 {
+    private StateMachine _stateMachine;
+
+    private void Start()
+    {
+        Initialize();
+    }
+
+    private void Update()
+    {
+        _stateMachine.StateMachineUpdate();
+    }
+
+    protected override void Initialize()
+    {
+        _stateMachine = new StateMachine(this);
+
+        _stateMachine.ChangeState(States.Walk.Instance);
+    }
+
     protected override void AIBehaviour()
     {
         throw new System.NotImplementedException();
     }
 
-    protected override void Attack()
+    public override void Attack()
     {
         throw new System.NotImplementedException();
     }
@@ -25,11 +44,6 @@ public class TimidEnemy : Enemy
     }
 
     protected override void Healed()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    protected override void Initialize()
     {
         throw new System.NotImplementedException();
     }

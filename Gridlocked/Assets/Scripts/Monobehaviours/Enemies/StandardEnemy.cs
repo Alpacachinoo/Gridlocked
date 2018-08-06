@@ -26,6 +26,7 @@ public class StandardEnemy : Enemy
 
     private void Start()
     {
+        base.Start();
         Initialize();
     }
 
@@ -38,30 +39,27 @@ public class StandardEnemy : Enemy
     protected override void Initialize()
     {
         base.InitializeAI();
+
+        _stateMachine.ChangeState(States.Walk.Instance);
     }
 
     protected override void AIBehaviour()
     {
-        if (Vector3.Distance(transform.position, base.target.position) <= attackRadius)
-        {
-            if (base.enroute)
-                base.StopNavigation();
+        //if (Vector3.Distance(transform.position, target.position) > stoppingDistance)
+        //    _stateMachine.ChangeState(States.Walk.Instance);
+        //else
+        //    _stateMachine.ChangeState(States.Attack.Instance);
 
-            Attack();
-        }
-        else
-        {
-            base.SetDestination();
-        }
+        _stateMachine.StateMachineUpdate();
     }
 
     [SerializeField] private LayerMask obstacleLayer;
 
-    protected override void Attack()
+    public override void Attack()
     {
         if (Time.time >= attackCooldownTime)
         {
-            directionToTarget = (target.position - transform.position).normalized;
+            directionToTarget = (targetPos - transform.position).normalized;
 
             if (!Physics.Raycast(transform.position, directionToTarget, attackRadius, LayerMap.currentLayerMap.GetLayer("Obstacle")))
             {
@@ -82,7 +80,8 @@ public class StandardEnemy : Enemy
 
     protected override void Damaged()
     {
-        Debug.Log("Damaged");
+        if (health.healthPoints / health.maxHealth < 0.3f)
+            _stateMachine.ChangeState(States.Run.Instance);
     }
 
     protected override void Die()

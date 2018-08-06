@@ -58,8 +58,8 @@ public class Grid : MonoBehaviour
 
     public Cell WorldToGrid(Vector3 worldPos)
     {
-        int x = Mathf.Clamp(Mathf.RoundToInt(worldPos.x / cellSize - originPoint.position.x), 0, gridDimensions.x - 1);
-        int y = Mathf.Clamp(Mathf.RoundToInt(worldPos.z / cellSize - originPoint.position.z), 0, gridDimensions.y - 1);
+        int x = Mathf.Clamp(Mathf.RoundToInt((worldPos.x - originPoint.position.x) / cellSize), 0, gridDimensions.x - 1);
+        int y = Mathf.Clamp(Mathf.RoundToInt((worldPos.z - originPoint.position.z) / cellSize), 0, gridDimensions.y - 1);
 
         return grid[x, y];
     }

@@ -36,15 +36,33 @@ public abstract class Enemy : MonoBehaviour
 
     #region Navigation.
     [Header("Navigation")]
-    [SerializeField] protected float speed;
-    protected float stoppingDistance;
+    public float speed;
+    public float stoppingDistance;
 
-    protected Transform target;
-    protected bool enroute = false;
+    [SerializeField] public Vector3 targetPos;
+    [SerializeField] public bool enroute { get; private set; }
     #endregion
 
+    public StateMachine _stateMachine;
+
+    public Vector3 spawnPos;
+
     #region References.
-    private NavMeshAgent nav;
+    public NavMeshAgent nav;
+    #endregion
+
+    #region Overridden functions.
+    protected abstract void Initialize();
+
+    protected abstract void AIBehaviour();
+
+    public abstract void Attack();
+
+    protected abstract void Healed();
+
+    protected abstract void Damaged();
+
+    protected abstract void Die();
     #endregion
 
     private void Awake()
@@ -52,39 +70,32 @@ public abstract class Enemy : MonoBehaviour
         nav = GetComponent<NavMeshAgent>();
     }
 
+    protected void Start()
+    {
+        spawnPos = transform.position;
+    }
+
     protected void InitializeAI()
     {
-        target = FindObjectOfType<Player>().transform;
-
         health.Initialize();
 
         nav.speed = speed;
         nav.stoppingDistance = stoppingDistance;
 
+        _stateMachine = new StateMachine(this);
+
         ToggleAI(true);
     }
 
-    protected void SetDestination()
+    public void SetDestination()
     {
-        nav.SetDestination(target.position);
+        nav.SetDestination(targetPos);
         enroute = true;
     }
 
-    protected void StopNavigation()
+    public void StopNavigation()
     {
         nav.ResetPath();
         enroute = false;
     }
-
-    protected abstract void Initialize();
-
-    protected abstract void AIBehaviour();
-
-    protected abstract void Attack();
-
-    protected abstract void Healed();
-
-    protected abstract void Damaged();
-
-    protected abstract void Die();
 }
